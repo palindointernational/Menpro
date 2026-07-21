@@ -11,6 +11,7 @@ class TaskResult extends Model
         'uploaded_by',
         'notes',
         'status',
+        'revision',
     ];
 
     public function taskItem()

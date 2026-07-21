@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Database\Seeders\UserSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -15,11 +15,8 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::create([
-            'name' => 'Admin Aprilia Project',
-            'email' => 'admin@aprilia.com',
-            'password' => bcrypt('password'),
-            'role' => 'admin',
+        $this->call([
+            UserSeeder::class,
         ]);
     }
 }

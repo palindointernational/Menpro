@@ -8,7 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class TaskItem extends Model
 {
-    protected $fillable = ['task_id', 'name', 'status', 'assigned_role'];
+    protected $fillable = [
+        'task_id',
+        'name',
+        'status',
+        'assigned_role',
+        'user_id',
+        'completed_at',
+        'due_date',
+    ];
 
     public static array $workflowOrder = [
         'surveyor' => 1,
@@ -42,6 +50,7 @@ class TaskItem extends Model
             return true;
         }
 
+
         $prevRoles = array_keys(array_filter($order, fn($step) => $step < $order[$role]));
 
 
@@ -58,7 +67,19 @@ class TaskItem extends Model
 
         return ! $pendingExists;
     }
+    protected static function booted(): void
+    {
+        static::updating(function (TaskItem $taskItem) {
 
+            if (
+                $taskItem->isDirty('status') &&
+                $taskItem->status === 'done' &&
+                is_null($taskItem->completed_at)
+            ) {
+                $taskItem->completed_at = now();
+            }
+        });
+    }
 
     public function task()
     {
@@ -68,5 +89,9 @@ class TaskItem extends Model
     public function results()
     {
         return $this->hasMany(TaskResult::class, 'task_item_id');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

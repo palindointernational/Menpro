@@ -47,9 +47,10 @@ class TaskItemsTable
                 TextColumn::make('task.end_date')
                     ->label('Finish')
                     ->date('d/m/Y'),
-                TextColumn::make('task.duration')
-                    ->label('Duration')
-                    ->suffix(' Day'),
+                TextColumn::make('due_date')
+                    ->label('Deadline')
+                    ->badge()
+                    ->date('d/m/Y'),
                 TextColumn::make('status')
                     ->label('Status')
                     ->color(fn(string $state): string => match ($state) {
@@ -135,23 +136,42 @@ class TaskItemsTable
                     ->color('danger')
                     ->icon('heroicon-o-x-circle')
                     ->requiresConfirmation()
-                    ->visible(fn($record) => Auth::user()?->role === 'admin'
-                        && $record->results()->where('status', 'submitted')->exists())
+                    ->visible(
+                        fn($record) =>
+                        Auth::user()?->role === 'admin'
+                            && $record->results()->where('status', 'submitted')->exists()
+                    )
                     ->action(function ($record) {
-                        $lastResult = $record->results()->latest()->with('files')->first();
 
-                        if ($lastResult) {
-                            foreach ($lastResult->files as $file) {
-                                if (Storage::disk('public')->exists($file->file_path)) {
-                                    Storage::disk('public')->delete($file->file_path);
-                                }
-                                $file->delete();
-                            }
+                        $lastResult = $record->results()
+                            ->latest()
+                            ->with('files')
+                            ->first();
 
-                            $lastResult->delete();
+                        if (!$lastResult) {
+                            return;
                         }
 
-                        $record->update(['status' => 'pending']);
+                        // hapus file upload
+                        foreach ($lastResult->files as $file) {
+
+                            if (Storage::disk('public')->exists($file->file_path)) {
+                                Storage::disk('public')->delete($file->file_path);
+                            }
+
+                            $file->delete();
+                        }
+
+                        // simpan histori
+                        $lastResult->update([
+                            'status' => 'rejected',
+                            'revision' => $lastResult->revision + 1,
+                        ]);
+
+                        // buka kembali task
+                        $record->update([
+                            'status' => 'pending',
+                        ]);
                     }),
                 Action::make('uploadResult')
                     ->label('Upload Hasil')
@@ -164,27 +184,65 @@ class TaskItemsTable
                             ->visibility('public')
                             ->multiple()
                             ->required(),
+
                         Textarea::make('notes')
-                            ->label('Catatan')
-                            ->nullable(),
+                            ->label('Catatan'),
                     ])
                     ->action(function (array $data, $record) {
-                        $result = $record->results()->create([
-                            'notes'       => $data['notes'] ?? null,
-                            'uploaded_by' => Auth::id(),
-                            'status'      => 'submitted',
-                        ]);
 
-                        foreach ($data['file_path'] as $path) {
-                            $result->files()->create(['file_path' => $path]);
+                        // Ambil hasil terakhir
+                        $result = $record->results()->latest()->first();
+
+                        if ($result && $result->status === 'rejected') {
+
+                            // Upload ulang pada hasil yang sama
+                            $result->update([
+                                'status' => 'submitted',
+                                'notes'  => $data['notes'] ?? null,
+                            ]);
+                        } else {
+
+                            // Upload pertama
+                            $result = $record->results()->create([
+                                'notes'       => $data['notes'] ?? null,
+                                'uploaded_by' => Auth::id(),
+                                'status'      => 'submitted',
+                                'revision'    => 0,
+                            ]);
                         }
+                        $result->files()->delete();
+                        // Simpan file baru
+                        foreach ($data['file_path'] as $path) {
+                            $result->files()->create([
+                                'file_path' => $path,
+                            ]);
+                        }
+
+                        // Simpan user yang mengerjakan
+                        $record->update([
+                            'user_id' => Auth::id(),
+                        ]);
                     })
                     ->modalHeading('Upload Hasil Pekerjaan')
                     ->modalSubmitActionLabel('Kirim')
-                    ->visible(
-                        fn($record) =>
-                        $record->canUpload() && ! $record->results()->exists()
-                    ),
+                    ->visible(function ($record) {
+
+                        // Tidak boleh upload jika memang tidak diizinkan
+                        if (! $record->canUpload()) {
+                            return false;
+                        }
+
+                        // Ambil hasil terakhir
+                        $lastResult = $record->results()->latest()->first();
+
+                        // Belum pernah upload
+                        if (! $lastResult) {
+                            return true;
+                        }
+
+                        // Bisa upload lagi jika hasil sebelumnya ditolak
+                        return $lastResult->status === 'rejected';
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
