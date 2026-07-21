@@ -28,6 +28,9 @@ class KpiPanelProvider extends PanelProvider
         return $panel
             ->id('kpi')
             ->path('kpi')
+            ->globalSearch(false)
+            ->darkMode(false)
+            ->collapsibleNavigationGroups(false)
             ->colors([
                 'primary' => Color::Amber,
             ])

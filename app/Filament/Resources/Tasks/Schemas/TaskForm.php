@@ -53,8 +53,8 @@ class TaskForm
                         ->schema([
                             Select::make('role')
                                 ->label('Select Role')
+                                ->native(false)
                                 ->options([
-                                    'admin' => 'Admin',
                                     'surveyor' => 'Surveyor',
                                     'desainer' => 'Desainer',
                                     'drafter' => 'Drafter',
@@ -116,6 +116,7 @@ class TaskForm
                         ->schema([
                             Select::make('assigned_role')
                                 ->label('Role')
+                                ->native(false)
                                 ->options([
                                     'admin' => 'Admin',
                                     'surveyor' => 'Surveyor',
@@ -129,13 +130,13 @@ class TaskForm
                                 ])
                                 ->required(),
                             Grid::make(2)
-                            ->schema([
-                            TextInput::make('name')->label('Item Name')->required(),
-                            DatePicker::make('due_date')
-                                ->label('Batas Waktu')
-                                ->required()
-                                ->native(false)
-                                ->helperText('Batas waktu penyelesaian item tugas.'),
+                                ->schema([
+                                    TextInput::make('name')->label('Item Name')->required(),
+                                    DatePicker::make('due_date')
+                                        ->label('Batas Waktu')
+                                        ->required()
+                                        ->native(false)
+                                        ->helperText('Batas waktu penyelesaian item tugas.'),
                                 ]),
                         ])
                         ->createItemButtonLabel('Add Task Item'),

@@ -217,8 +217,6 @@ class TaskItemsTable
                                 'file_path' => $path,
                             ]);
                         }
-
-                        // Simpan user yang mengerjakan
                         $record->update([
                             'user_id' => Auth::id(),
                         ]);
