@@ -2,14 +2,11 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Pages\AccountSettings;
-use App\Filament\Widgets\ProjectGanttChart;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
@@ -24,28 +21,26 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class AdminPanelProvider extends PanelProvider
+class KpiPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            ->id('admin')
-            ->path('admin')
-            ->login()
-            ->globalSearch(false)
+            ->id('kpi')
+            ->path('kpi')
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->discoverResources(in: app_path('Filament/Kpi/Resources'), for: 'App\Filament\Kpi\Resources')
+            ->discoverPages(in: app_path('Filament/Kpi/Pages'), for: 'App\Filament\Kpi\Pages')
             ->pages([
-                Dashboard::class,
+                // Dashboard::class,
+                \App\Filament\Kpi\Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Kpi/Widgets'), for: 'App\Filament\Kpi\Widgets')
             ->widgets([
                 AccountWidget::class,
-                // ProjectGanttChart::class,
+                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -61,13 +56,11 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-
             ->navigationItems([
-                NavigationItem::make('KPI Dashboard')
-                    ->icon('heroicon-o-chart-bar')
-                    ->url(fn() => Filament::getPanel('kpi')->getUrl())
-                    ->visible(fn() => auth()->user()?->role === 'admin')
-                    ->sort(1),
+                NavigationItem::make('Back to Main Panel')
+                    ->icon('heroicon-o-arrow-left-start-on-rectangle')
+                    ->url(fn() => Filament::getPanel('admin')->getUrl())
+                    ->sort(2),
             ]);
     }
 }

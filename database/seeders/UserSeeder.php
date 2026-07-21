@@ -14,6 +14,12 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::create([
+            'name' => 'Admin Aprilia Project',
+            'email' => 'admin@aprilia.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+        ]);
+        User::create([
             'name' => 'surveyor',
             'email' => 'surveyor@gmail.com',
             'password' => bcrypt('password'),
