@@ -18,6 +18,8 @@ class ClientsTable
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('email')
+                    ->searchable(),
                 TextColumn::make('phone')
                     ->searchable(),
                 TextColumn::make('address')

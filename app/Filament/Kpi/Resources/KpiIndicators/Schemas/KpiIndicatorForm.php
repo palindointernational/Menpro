@@ -92,17 +92,6 @@ class KpiIndicatorForm
 
                     ]),
 
-                Section::make('Otomatisasi')
-                    ->description('Tentukan apakah indikator dihitung secara otomatis oleh sistem.')
-                    ->schema([
-
-                        Toggle::make('is_auto')
-                            ->label('Hitung Otomatis')
-                            ->default(true)
-                            ->inline(false)
-                            ->helperText('Jika aktif, sistem akan menghitung indikator secara otomatis berdasarkan data proyek.'),
-
-                    ]),
             ]);
     }
 }

@@ -16,12 +16,18 @@ class ClientForm
             ->components([
                 Section::make('Client Detail')
                     ->schema([
-                        Grid::make(2)
+                        Grid::make(3)
                             ->schema([
                                 TextInput::make('name')
                                     ->required(),
+                                TextInput::make('email')
+                                    ->label('Email address')
+                                    ->email()
+                                    ->unique(ignoreRecord: true)
+                                    ->required(),
                                 TextInput::make('phone')
                                     ->tel()
+                                    ->unique(ignoreRecord: true)
                                     ->required(),
                             ]),
                         TextInput::make('address')

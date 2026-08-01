@@ -23,6 +23,7 @@ class UserForm
                             TextInput::make('email')
                                 ->label('Email address')
                                 ->email()
+                                ->unique(ignoreRecord: true)
                                 ->required(),
                         ]),
                     Grid::make(2)

@@ -38,6 +38,11 @@ class TaskItemsTable
                     ->label('User Assigned')
                     ->badge()
                     ->searchable(),
+                TextColumn::make('task.project.name')
+                    ->label('Project')
+                    ->searchable()
+                    ->limit(10)
+                    ->tooltip(fn($record) => $record->task->project->name),
                 TextColumn::make('name')
                     ->label('Task Item')
                     ->searchable(),
@@ -50,7 +55,8 @@ class TaskItemsTable
                 TextColumn::make('due_date')
                     ->label('Deadline')
                     ->badge()
-                    ->date('d/m/Y'),
+                    ->date('d/m/Y')
+                    ->sortable(),
                 TextColumn::make('status')
                     ->label('Status')
                     ->color(fn(string $state): string => match ($state) {

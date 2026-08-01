@@ -10,6 +10,7 @@ use UnitEnum;
 use App\Models\KpiPeriod;
 use App\Services\KpiCalculatorService;
 use Filament\Notifications\Notification;
+use Filament\Forms\Components\Select;
 
 class GenerateKpi extends Page
 {
@@ -51,21 +52,16 @@ class GenerateKpi extends Page
 
                 ->form([
 
-                    \Filament\Forms\Components\Select::make('period_id')
-
-                        ->label('Periode KPI')
-
-                        ->options(
-
-                            KpiPeriod::orderByDesc('start_date')
-                                ->pluck('name', 'id')
-
-                        )
-
-                        ->required()
-
-                        ->searchable(),
-
+                    Select::make('period_id')
+                    ->label('Periode KPI')
+                    ->options(
+                        KpiPeriod::query()
+                            ->where('is_active', true)
+                            ->orderByDesc('start_date')
+                            ->pluck('name', 'id')
+                    )
+                    ->required()
+                    ->searchable(),
                 ])
 
                 ->action(function (array $data) {

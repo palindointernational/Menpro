@@ -42,6 +42,7 @@ class GradeDistributionChart extends ChartWidget
             ->orderBy('grade')
             ->get();
 
+            $total = $grades->sum('total');
         return [
             'datasets' => [
                 [
@@ -59,21 +60,23 @@ class GradeDistributionChart extends ChartWidget
                     'hoverOffset' => 10,
                 ],
             ],
-
+            
             'labels' => $grades
-                ->map(function ($item) {
-
+                ->map(function ($item) use ($total) {
+                    $percentage = $total > 0
+                    ? round(($item->total / $total) * 100)
+                    : 0;    
                     return match ($item->grade) {
 
-                        'A' => 'A (Excellent)',
+                        'A' => "A (Excellent) {$percentage}%",
 
-                        'B' => 'B (Good)',
+                        'B' => "B (Good) {$percentage}%",
 
-                        'C' => 'C (Average)',
+                        'C' => "C (Average) {$percentage}%",
 
-                        'D' => 'D (Poor)',
+                        'D' => "D (Poor) {$percentage}%",
 
-                        default => 'E (Very Poor)',
+                        default => "E (Very Poor) {$percentage}%",
                     };
                 })
                 ->toArray(),
@@ -100,4 +103,6 @@ class GradeDistributionChart extends ChartWidget
             ],
         ];
     }
+
+    
 }

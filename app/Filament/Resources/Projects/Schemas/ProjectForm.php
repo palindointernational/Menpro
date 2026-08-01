@@ -35,10 +35,22 @@ class ProjectForm
                             ->schema([
                                 DatePicker::make('start_date')
                                     ->label('Start Date')
-                                    ->required(),
+                                    ->live()
+                                    ->required()
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+
+                                    if ($get('end_date') && Carbon::parse($get('end_date'))->lt(Carbon::parse($state))) {
+                                        $set('end_date', $state);
+                                    }
+
+                                }),
                                 DatePicker::make('end_date')
                                     ->label('End Date')
+                                    ->live()
                                     ->required()
+                                    ->minDate(function ($get) {
+                                    return $get('start_date');
+                                    })
                             ]),
                     ])
                     ->compact()

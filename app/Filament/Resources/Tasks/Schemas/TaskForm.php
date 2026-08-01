@@ -88,21 +88,34 @@ class TaskForm
                         ->schema([
                             DatePicker::make('start_date')
                                 ->label('Start Date')
-                                ->reactive()
+                                ->live()
                                 ->required()
-                                ->afterStateUpdated(
-                                    fn($state, callable $set, callable $get) =>
-                                    $set('duration', self::calculateDuration($state, $get('end_date')))
-                                ),
+                                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+
+                                    if ($get('end_date') && Carbon::parse($get('end_date'))->lt(Carbon::parse($state))) {
+                                        $set('end_date', $state);
+                                    }
+
+                                    $set(
+                                        'duration',
+                                        self::calculateDuration($state, $get('end_date'))
+                                    );
+                                }),
 
                             DatePicker::make('end_date')
                                 ->label('End Date')
-                                ->reactive()
+                                ->live()
                                 ->required()
-                                ->afterStateUpdated(
-                                    fn($state, callable $set, callable $get) =>
-                                    $set('duration', self::calculateDuration($get('start_date'), $state))
-                                ),
+                                ->minDate(function ($get) {
+                                    return $get('start_date');
+                                })
+
+                                    ->afterStateUpdated(fn($state, callable $set, callable $get) =>
+                                        $set(
+                                            'duration',
+                                            self::calculateDuration($get('start_date'), $state)
+                                        )
+                                    ),
 
                             TextInput::make('duration')
                                 ->label('Duration')
@@ -136,7 +149,10 @@ class TaskForm
                                         ->label('Batas Waktu')
                                         ->required()
                                         ->native(false)
-                                        ->helperText('Batas waktu penyelesaian item tugas.'),
+                                        ->minDate(fn ($get) => $get('../../start_date'))
+                                        ->maxDate(fn ($get) => $get('../../end_date'))
+
+                                        ->helperText('Tanggal harus berada di antara Start Date dan End Date.'),
                                 ]),
                         ])
                         ->createItemButtonLabel('Add Task Item'),

@@ -24,10 +24,21 @@ class KpiPeriodForm
                             ->schema([
                                 DatePicker::make('start_date')
                                     ->label('Tanggal Mulai')
-                                    ->required(),
+                                    ->live()
+                                    ->required()
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+
+                                    if ($get('end_date') && Carbon::parse($get('end_date'))->lt(Carbon::parse($state))) {
+                                        $set('end_date', $state);
+                                    }
+                                    }), 
                                 DatePicker::make('end_date')
                                     ->label('Tanggal Selesai')
-                                    ->required(),
+                                    ->live()
+                                    ->required()
+                                    ->minDate(function ($get) {
+                                    return $get('start_date');
+                                    }),
                             ]),
                         Toggle::make('is_active')
                             ->label('Active')

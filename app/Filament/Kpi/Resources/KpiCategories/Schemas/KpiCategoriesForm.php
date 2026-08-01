@@ -37,7 +37,6 @@ class KpiCategoriesForm
                                     ->minValue(0)
                                     ->maxValue(100)
                                     ->required(),
-
                             ]),
 
                         Textarea::make('description')

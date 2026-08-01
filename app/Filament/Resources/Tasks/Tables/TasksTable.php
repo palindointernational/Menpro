@@ -31,7 +31,7 @@ class TasksTable
                     ->label('Project')
                     ->collapsible(),
             ])
-            ->defaultGroup('project.name')
+            // ->defaultGroup('project.name')
             ->columns([
                 TextColumn::make('project.name')
                     ->sortable()
@@ -46,24 +46,17 @@ class TasksTable
                     ->searchable(),
                 TextColumn::make('duration')
                     ->label('Duration')
-                    ->suffix(' Day'),
+                    ->suffix(' Day')
+                    ->sortable(),
             ])
             ->filters([
                 Filter::make('progress')
                     ->query(fn(Builder $query) => $query->where('progress', true)),
+
             ])
             ->recordActions([
                 ViewAction::make(),
-                // EditAction::make(),
-                // Action::make('Timeline')
-                //     ->label('Timeline')
-                //     ->icon('heroicon-o-bars-3-bottom-left')
-                //     ->slideOver()
-                //     ->modalWidth(Width::FiveExtraLarge)
-                //     ->form([
-                //         View::make('tasks.timeline')
-                //             ->viewData(fn($record) => ['record' => $record]),
-                //     ])->modalSubmitAction(false),
+
 
             ])
             ->toolbarActions([

@@ -14,11 +14,9 @@ class KpiCalculatorService
 {
     public function generate(KpiPeriod $period): void
     {
-        // Hapus hasil generate sebelumnya
         KpiScore::where('period_id', $period->id)->delete();
         KpiSummarie::where('period_id', $period->id)->delete();
 
-        // Ambil seluruh user (kecuali admin jika diperlukan)
         $users = User::where('role', '!=', 'admin')->get();
 
         foreach ($users as $user) {
@@ -163,6 +161,18 @@ class KpiCalculatorService
 
     protected function revisionRate(User $user, KpiPeriod $period): float
     {
+        $totalTask = TaskItem::query()
+            ->where('user_id', $user->id)
+            ->whereBetween('created_at', [
+                $period->start_date,
+                $period->end_date,
+            ])
+            ->count();
+
+        if ($totalTask === 0) {
+            return 0;
+        }
+
         $revision = TaskResult::query()
             ->where('status', 'rejected')
             ->whereHas('taskItem', function ($query) use ($user) {
@@ -174,7 +184,9 @@ class KpiCalculatorService
             ])
             ->count();
 
-        return max(0, 100 - ($revision * 5));
+        $revisionRate = ($revision / $totalTask) * 100;
+
+        return round(100 - $revisionRate, 2);
     }
 
     protected function grade(float $score): string
