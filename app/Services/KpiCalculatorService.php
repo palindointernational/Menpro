@@ -25,17 +25,24 @@ class KpiCalculatorService
             $indicators = KpiIndicator::get();
 
             foreach ($indicators as $indicator) {
-                $rawValue = $this->calculateIndicator($user, $indicator, $period);
-
-                $rawValue = max(0, $rawValue);
-
-                $normalizedValue = min(
-                    $rawValue,
-                    $indicator->max_score
+                $rawValue = $this->calculateIndicator(
+                    $user,
+                    $indicator,
+                    $period
                 );
 
-                $score = ($normalizedValue / $indicator->max_score)
-                    * $indicator->weight;
+                $rawValue = max(
+                    0,
+                    min($rawValue, $indicator->max_score)
+                );
+                $score = 0;
+
+                if ($indicator->max_score > 0) {
+                    $score = (
+                        $rawValue / $indicator->max_score
+                    ) * $indicator->weight;
+                }
+
                 KpiScore::create([
                     'period_id' => $period->id,
                     'user_id' => $user->id,
@@ -95,15 +102,50 @@ class KpiCalculatorService
             ->count();
     }
 
+    protected function approvalRate(User $user, KpiPeriod $period): float
+    {
+        $totalTask = TaskItem::where('user_id', $user->id)
+            ->whereBetween('created_at', [
+                $period->start_date,
+                $period->end_date,
+            ])
+            ->count();
+
+        if ($totalTask === 0) {
+            return 0;
+        }
+
+        $approved = TaskResult::where('status', 'approved')
+            ->whereHas('taskItem', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->whereBetween('created_at', [
+                $period->start_date,
+                $period->end_date,
+            ])
+            ->count();
+
+        return round(
+            min(($approved / $totalTask) * 100, 100),
+            2
+        );
+    }
+
     protected function calculateIndicator(User $user, KpiIndicator $indicator, KpiPeriod $period): float
     {
         return match ($indicator->formula) {
 
-            'task_completion' => $this->taskCompletion($user, $period),
+            'task_completion' =>
+            $this->taskCompletion($user, $period),
 
-            'on_time_completion' => $this->onTimeCompletion($user, $period),
+            'on_time_completion' =>
+            $this->onTimeCompletion($user, $period),
 
-            'revision_rate' => $this->revisionRate($user, $period),
+            'approval_rate' =>
+            $this->approvalRate($user, $period),
+
+            'revision_rate' =>
+            $this->revisionRate($user, $period),
 
             default => 0,
         };

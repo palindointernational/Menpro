@@ -48,42 +48,42 @@ class KpiSeeder extends Seeder
 
         KpiIndicator::create([
             'kpi_categories_id' => $taskCompletion->id,
-            'name'            => 'Penyelesaian Tugas',
-            'description'     => 'Persentase task yang berhasil diselesaikan.',
-            'formula'         => 'task_completion',
-            'weight'          => 100,
-            'max_score'       => 100,
-            'is_auto'         => true,
+            'name'              => 'Penyelesaian Tugas',
+            'description'       => 'Persentase task yang berhasil diselesaikan.',
+            'formula'           => 'task_completion',
+            'weight'            => 40,
+            'max_score'         => 100,
+            'is_auto'           => true,
         ]);
 
         KpiIndicator::create([
             'kpi_categories_id' => $onTime->id,
-            'name'            => 'Ketepatan Waktu',
-            'description'     => 'Persentase task yang selesai sebelum atau tepat pada deadline.',
-            'formula'         => 'on_time_completion',
-            'weight'          => 100,
-            'max_score'       => 100,
-            'is_auto'         => true,
+            'name'              => 'Ketepatan Waktu',
+            'description'       => 'Persentase task yang selesai sebelum atau tepat pada deadline.',
+            'formula'           => 'on_time_completion',
+            'weight'            => 30,
+            'max_score'         => 100,
+            'is_auto'            => true,
         ]);
 
         KpiIndicator::create([
             'kpi_categories_id' => $quality->id,
-            'name'            => 'Kualitas Hasil Pekerjaan',
-            'description'     => 'Persentase hasil pekerjaan yang langsung disetujui.',
-            'formula'         => 'approval_rate',
-            'weight'          => 100,
-            'max_score'       => 100,
-            'is_auto'         => true,
+            'name'              => 'Kualitas Hasil Pekerjaan',
+            'description'       => 'Persentase hasil pekerjaan yang langsung disetujui.',
+            'formula'            => 'approval_rate',
+            'weight'             => 20,
+            'max_score'          => 100,
+            'is_auto'             => true,
         ]);
 
         KpiIndicator::create([
             'kpi_categories_id' => $revision->id,
-            'name'            => 'Revisi Pekerjaan',
-            'description'     => 'Mengukur jumlah revisi berdasarkan hasil pekerjaan yang ditolak.',
-            'formula'         => 'revision_rate',
-            'weight'          => 100,
-            'max_score'       => 100,
-            'is_auto'         => true,
+            'name'              => 'Revisi Pekerjaan',
+            'description'       => 'Mengukur jumlah revisi berdasarkan hasil pekerjaan yang ditolak.',
+            'formula'            => 'revision_rate',
+            'weight'              => 10,
+            'max_score'           => 100,
+            'is_auto'              => true,
         ]);
     }
 }
