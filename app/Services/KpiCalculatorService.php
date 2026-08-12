@@ -26,14 +26,22 @@ class KpiCalculatorService
 
             foreach ($indicators as $indicator) {
                 $rawValue = $this->calculateIndicator($user, $indicator, $period);
-                $score = ($rawValue / $indicator->max_score) * $indicator->weight;
 
+                $rawValue = max(0, $rawValue);
+
+                $normalizedValue = min(
+                    $rawValue,
+                    $indicator->max_score
+                );
+
+                $score = ($normalizedValue / $indicator->max_score)
+                    * $indicator->weight;
                 KpiScore::create([
                     'period_id' => $period->id,
                     'user_id' => $user->id,
                     'indicator_id' => $indicator->id,
-                    'raw_value' => $rawValue,
-                    'score' => round($score, 2),
+                    'raw_value'   => round($rawValue, 2),
+                    'score'       => round($score, 2),
                 ]);
 
                 $totalScore += $score;
